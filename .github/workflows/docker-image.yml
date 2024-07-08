@@ -20,7 +20,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
 
     - name: Build the Docker image
       run: |
@@ -32,4 +32,7 @@ jobs:
 
     - name: Run Docker container
       run: |
-        docker run -t -e JDK_VERSION=${{ matrix.jdk_version }} --rm msopenjdk-freetype:${{ matrix.base_os }}-${{ matrix.jdk_version }}
+        docker run -t -e JDK_VERSION=${{ matrix.jdk_version }} --rm msopenjdk-freetype:${{ matrix.base_os }}-${{ matrix.jdk_version }} | tee output.txt
+        echo "::group::Report of libfreetype.so in mcr.microsoft.com/openjdk/jdk:${{ matrix.base_os }}-${{ matrix.jdk_version }}"
+        cat output.txt
+        echo "::endgroup::"
