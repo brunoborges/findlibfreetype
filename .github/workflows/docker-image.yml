@@ -57,7 +57,7 @@ jobs:
 
     - name: Combine Outputs into a Single Report
       run: |
-        cat outputs/*.txt > combined-report.txt
+        find outputs -name '*.txt' -exec sh -c 'cat {} >> combined-report.txt && echo "" >> combined-report.txt' \;
         cat combined-report.txt
 
     - name: Upload Combined Report to Workflow Summary
