@@ -13,13 +13,14 @@ jobs:
 
     strategy:
       matrix:
-        base_tag: [ '11-ubuntu', '17-ubuntu', '21-ubuntu', '11-mariner', '17-mariner', '21-mariner', '8-mariner' ]
+        jdk_version: [ '11', '17', '21' ]
+        base_os: [ 'ubuntu', 'mariner' ]
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
+#    - name: Set up QEMU
+#      uses: docker/setup-qemu-action@v2
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -27,10 +28,10 @@ jobs:
     - name: Build the Docker image
       run: |
         docker build . \
-          --build-arg BASE_IMAGE=mcr.microsoft.com/openjdk/jdk:${{ matrix.base_tag }} \
+          --build-arg BASE_OS=mcr.microsoft.com/openjdk/jdk:${{ matrix.base_os }} JDK_VERSION=${{ matrix.jdk_version }} \
           --file Dockerfile \
-          --tag msopenjdk-freetype:${{ matrix.base_tag }}
+          --tag msopenjdk-freetype:${{ matrix.base_os }}-${{ matrix.jdk_version }}
 
     - name: Run Docker container
       run: |
-        docker run -t --rm msopenjdk-freetype:${{ matrix.base_tag }}
+        docker run -t -e JDK_VERSION=${{ matrix.jdk_version }} --rm msopenjdk-freetype:${{ matrix.base_os }}-${{ matrix.jdk_version }}
