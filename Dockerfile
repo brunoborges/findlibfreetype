@@ -1,5 +1,6 @@
 # Use the base image
-FROM mcr.microsoft.com/openjdk/jdk:17-ubuntu
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
 
 # Update the package list and install gawk
 RUN apt-get update && apt-get install -y gawk
