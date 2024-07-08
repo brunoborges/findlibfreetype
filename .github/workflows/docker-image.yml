@@ -15,6 +15,7 @@ jobs:
       matrix:
         jdk_version: [ '11', '17', '21' ]
         base_os: [ 'ubuntu', 'mariner' ]
+      fail-fast: false
 
     steps:
     - uses: actions/checkout@v4
@@ -30,9 +31,48 @@ jobs:
           --file Dockerfile \
           --tag msopenjdk-freetype:${{ matrix.base_os }}-${{ matrix.jdk_version }}
 
-    - name: Run Docker container
+    - name: Run Docker container and Collect Output
       run: |
-        docker run -t -e JDK_VERSION=${{ matrix.jdk_version }} --rm msopenjdk-freetype:${{ matrix.base_os }}-${{ matrix.jdk_version }} | tee output.txt
+        docker run -t -e JDK_VERSION=${{ matrix.jdk_version }} --rm msopenjdk-freetype:${{ matrix.base_os }}-${{ matrix.jdk_version }} > output-${{ matrix.jdk_version }}-${{ matrix.base_os }}.txt
         echo "::group::Report of libfreetype.so in mcr.microsoft.com/openjdk/jdk:${{ matrix.base_os }}-${{ matrix.jdk_version }}"
-        cat output.txt
+        cat output-${{ matrix.jdk_version }}-${{ matrix.base_os }}.txt
         echo "::endgroup::"
+
+    - name: Upload Output
+      uses: actions/upload-artifact@v3
+      with:
+        name: output-${{ matrix.jdk_version }}-${{ matrix.base_os }}
+        path: output-${{ matrix.jdk_version }}-${{ matrix.base_os }}.txt
+
+  combine-reports:
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+    - uses: actions/checkout@v4
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: outputs
+
+    - name: Combine Outputs into a Single Report
+      run: |
+        cat outputs/*.txt > combined-report.txt
+        cat combined-report.txt
+
+    - name: Upload Combined Report to Workflow Summary
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const report = fs.readFileSync('combined-report.txt', 'utf8');
+          console.log(report);
+          github.rest.actions.createWorkflowRunSummary({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            run_id: context.runId,
+            text: report,
+            headers: {
+              'Content-Type': 'text/markdown',
+            },
+          });
