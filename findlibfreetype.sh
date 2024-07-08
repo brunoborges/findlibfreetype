@@ -1,19 +1,27 @@
 #!/bin/bash
 
-# Run apt-cache madison msopenjdk-17 and parse the output to get package versions
-versions=$(apt-cache madison msopenjdk-17 | awk -F '|' '{print $2}' | tr -d ' ')
+# Determine package manager based on OS
+if command -v apt-get &> /dev/null; then
+    PACKAGE_MANAGER="apt-get"
+elif command -v tdnf &> /dev/null; then
+    PACKAGE_MANAGER="tdnf"
+else
+    echo "Unsupported package manager. Exiting."
+    exit 1
+fi
 
-# Initialize arrays to store versions with and without the file
-versions_with_file=()
-versions_without_file=()
-
-# Loop through each version and install it, then check for the file
-for version in $versions; {
+# Function to install msopenjdk-17 and check for libfreetype.so
+check_version() {
+    local version=$1
     echo "Installing msopenjdk-17 version $version"
-    apt-get install -y --allow-downgrades msopenjdk-17=$version
 
-    # Check if the file exists
-    if ls $JAVA_HOME/libfreetype.so 1> /dev/null 2>&1; then
+    if [ "$PACKAGE_MANAGER" = "apt-get" ]; then
+        sudo apt-get install -y --allow-downgrades msopenjdk-17=$version
+    else
+        sudo tdnf install -y msopenjdk-17-$version
+    fi
+
+    if [ -n "$JAVA_HOME" ] && [ -f "$JAVA_HOME/lib/libfreetype.so" ]; then
         echo "File exists for version $version"
         versions_with_file+=($version)
     else
@@ -21,9 +29,28 @@ for version in $versions; {
         versions_without_file+=($version)
     fi
 
-    # Optionally, you may want to remove the installed package before trying the next version
-    apt-get remove -y msopenjdk-17
+    if [ "$PACKAGE_MANAGER" = "apt-get" ]; then
+        sudo apt-get remove -y msopenjdk-17
+    else
+        sudo tdnf remove -y msopenjdk-17
+    fi
 }
+
+# Get list of versions
+if [ "$PACKAGE_MANAGER" = "apt-get" ]; then
+    versions=$(apt-cache madison msopenjdk-17 | awk -F '|' '{print $2}' | tr -d ' ')
+else
+    versions=$(tdnf list msopenjdk-17 | grep msopenjdk-17 | awk '{print $2}')
+fi
+
+# Initialize arrays to store versions with and without the file
+versions_with_file=()
+versions_without_file=()
+
+# Loop through each version and check
+for version in $versions; do
+    check_version $version
+done
 
 # Report the versions with and without the file
 echo "Versions with libfreetype.so:"
