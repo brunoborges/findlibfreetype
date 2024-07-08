@@ -10,6 +10,13 @@ else
     exit 1
 fi
 
+# Install gawk
+if [ "$PACKAGE_MANAGER" = "apt-get" ]; then
+    apt-get update && apt-get install -y gawk
+else
+    tdnf update && tdnf install -y gawk
+fi
+
 # Function to install msopenjdk-17 and check for libfreetype.so
 check_version() {
     local version=$1
