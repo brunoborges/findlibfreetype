@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Determine package manager based on OS
-if command -v apt-get &> /dev/null; then
+if ls /usr/bin/apt-get &> /dev/null; then
     PACKAGE_MANAGER="apt-get"
-elif command -v tdnf &> /dev/null; then
+elif ls /usr/bin/tdnf &> /dev/null; then
     PACKAGE_MANAGER="tdnf"
 else
     echo "Unsupported package manager. Exiting."
