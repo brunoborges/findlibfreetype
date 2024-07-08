@@ -6,40 +6,36 @@ if ls /usr/bin/apt-get &> /dev/null; then
 elif ls /usr/bin/tdnf &> /dev/null; then
     PACKAGE_MANAGER="tdnf"
 else
-    echo "Unsupported package manager. Exiting."
     exit 1
 fi
 
 # Install gawk
 if [ "$PACKAGE_MANAGER" = "apt-get" ]; then
-    apt-get update && apt-get install -y gawk
+    apt-get update -qq > /dev/null 2>&1 && apt-get install -y -qq gawk > /dev/null 2>&1
 else
-    tdnf update && tdnf install -y gawk
+    tdnf update -q > /dev/null 2>&1 && tdnf install -y -q gawk > /dev/null 2>&1
 fi
 
 # Function to install msopenjdk and check for libfreetype.so
 check_version() {
     local version=$1
-    echo "Installing msopenjdk-$JDK_VERSION version $version"
 
     if [ "$PACKAGE_MANAGER" = "apt-get" ]; then
-        apt-get install -y --allow-downgrades msopenjdk-$JDK_VERSION=$version
+        apt-get install -y -qq --allow-downgrades msopenjdk-$JDK_VERSION=$version > /dev/null 2>&1
     else
-        tdnf install -y msopenjdk-$JDK_VERSION-$version
+        tdnf install -y -q msopenjdk-$JDK_VERSION-$version > /dev/null 2>&1
     fi
 
     if [ -n "$JAVA_HOME" ] && [ -f "$JAVA_HOME/lib/libfreetype.so" ]; then
-        echo "File exists for version $version"
         versions_with_file+=($version)
     else
-        echo "File does not exist for version $version"
         versions_without_file+=($version)
     fi
 
     if [ "$PACKAGE_MANAGER" = "apt-get" ]; then
-        apt-get remove -y msopenjdk-$JDK_VERSION
+        apt-get remove -y -qq msopenjdk-$JDK_VERSION > /dev/null 2>&1
     else
-        tdnf remove -y msopenjdk-$JDK_VERSION
+        tdnf remove -y -q msopenjdk-$JDK_VERSION > /dev/null 2>&1
     fi
 }
 
