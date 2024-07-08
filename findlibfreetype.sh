@@ -13,7 +13,7 @@ for version in $versions; {
     apt-get install -y --allow-downgrades msopenjdk-17=$version
 
     # Check if the file exists
-    if ls /usr/lib/jvm/msopenjdk-17/lib/libfreetype.so 1> /dev/null 2>&1; then
+    if ls $JAVA_HOME/libfreetype.so 1> /dev/null 2>&1; then
         echo "File exists for version $version"
         versions_with_file+=($version)
     else
