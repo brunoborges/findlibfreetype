@@ -17,15 +17,15 @@ else
     tdnf update && tdnf install -y gawk
 fi
 
-# Function to install msopenjdk-17 and check for libfreetype.so
+# Function to install msopenjdk and check for libfreetype.so
 check_version() {
     local version=$1
-    echo "Installing msopenjdk-17 version $version"
+    echo "Installing msopenjdk-$JDK_VERSION version $version"
 
     if [ "$PACKAGE_MANAGER" = "apt-get" ]; then
-        apt-get install -y --allow-downgrades msopenjdk-17=$version
+        apt-get install -y --allow-downgrades msopenjdk-$JDK_VERSION=$version
     else
-        tdnf install -y msopenjdk-17-$version
+        tdnf install -y msopenjdk-$JDK_VERSION-$version
     fi
 
     if [ -n "$JAVA_HOME" ] && [ -f "$JAVA_HOME/lib/libfreetype.so" ]; then
@@ -37,17 +37,17 @@ check_version() {
     fi
 
     if [ "$PACKAGE_MANAGER" = "apt-get" ]; then
-        apt-get remove -y msopenjdk-17
+        apt-get remove -y msopenjdk-$JDK_VERSION
     else
-        tdnf remove -y msopenjdk-17
+        tdnf remove -y msopenjdk-$JDK_VERSION
     fi
 }
 
 # Get list of versions
 if [ "$PACKAGE_MANAGER" = "apt-get" ]; then
-    versions=$(apt-cache madison msopenjdk-17 | awk -F '|' '{print $2}' | tr -d ' ')
+    versions=$(apt-cache madison msopenjdk-$JDK_VERSION | awk -F '|' '{print $2}' | tr -d ' ')
 else
-    versions=$(tdnf list msopenjdk-17 | grep msopenjdk-17 | awk '{print $2}')
+    versions=$(tdnf list msopenjdk-$JDK_VERSION | grep msopenjdk-$JDK_VERSION | awk '{print $2}')
 fi
 
 # Initialize arrays to store versions with and without the file
