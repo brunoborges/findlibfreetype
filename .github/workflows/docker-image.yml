@@ -39,7 +39,7 @@ jobs:
         echo "::endgroup::"
 
     - name: Upload Output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: output-${{ matrix.jdk_version }}-${{ matrix.base_os }}
         path: output-${{ matrix.jdk_version }}-${{ matrix.base_os }}.txt
@@ -51,7 +51,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Download all artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         path: outputs
 
@@ -61,7 +61,7 @@ jobs:
         cat combined-report.txt
 
     - name: Upload Combined Report to Workflow Summary
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           const fs = require('fs');
