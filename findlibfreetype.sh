@@ -16,9 +16,9 @@ check_version() {
     echo "Installing msopenjdk-17 version $version"
 
     if [ "$PACKAGE_MANAGER" = "apt-get" ]; then
-        sudo apt-get install -y --allow-downgrades msopenjdk-17=$version
+        apt-get install -y --allow-downgrades msopenjdk-17=$version
     else
-        sudo tdnf install -y msopenjdk-17-$version
+        tdnf install -y msopenjdk-17-$version
     fi
 
     if [ -n "$JAVA_HOME" ] && [ -f "$JAVA_HOME/lib/libfreetype.so" ]; then
@@ -30,9 +30,9 @@ check_version() {
     fi
 
     if [ "$PACKAGE_MANAGER" = "apt-get" ]; then
-        sudo apt-get remove -y msopenjdk-17
+        apt-get remove -y msopenjdk-17
     else
-        sudo tdnf remove -y msopenjdk-17
+        tdnf remove -y msopenjdk-17
     fi
 }
 
