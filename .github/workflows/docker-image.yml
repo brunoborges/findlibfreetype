@@ -28,7 +28,7 @@ jobs:
     - name: Build the Docker image
       run: |
         docker build . \
-          --build-arg BASE_OS=mcr.microsoft.com/openjdk/jdk:${{ matrix.base_os }} JDK_VERSION=${{ matrix.jdk_version }} \
+          --build-arg BASE_IMAGE=mcr.microsoft.com/openjdk/jdk:${{ matrix.jdk_version }}-${{ matrix.base_os }} \
           --file Dockerfile \
           --tag msopenjdk-freetype:${{ matrix.base_os }}-${{ matrix.jdk_version }}
 
