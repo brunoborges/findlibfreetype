@@ -56,12 +56,12 @@ for version in $versions; do
 done
 
 # Report the versions with and without the file
-echo "Versions with libfreetype.so:"
+echo "## Versions with libfreetype.so:"
 for version in "${versions_with_file[@]}"; do
-    echo $version
+    echo " * $version"
 done
 
-echo "Versions without libfreetype.so:"
+echo "## Versions without libfreetype.so:"
 for version in "${versions_without_file[@]}"; do
-    echo $version
+    echo " * $version"
 done

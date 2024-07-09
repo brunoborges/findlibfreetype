@@ -33,46 +33,36 @@ jobs:
 
     - name: Run Docker container and Collect Output
       run: |
-        docker run -t -e JDK_VERSION=${{ matrix.jdk_version }} --rm msopenjdk-freetype:${{ matrix.base_os }}-${{ matrix.jdk_version }} > output-${{ matrix.jdk_version }}-${{ matrix.base_os }}.txt
-        echo "::group::Report of libfreetype.so in mcr.microsoft.com/openjdk/jdk:${{ matrix.base_os }}-${{ matrix.jdk_version }}"
-        cat output-${{ matrix.jdk_version }}-${{ matrix.base_os }}.txt
-        echo "::endgroup::"
+        echo "# Report of libfreetype.so in mcr.microsoft.com/openjdk/jdk:${{ matrix.base_os }}-${{ matrix.jdk_version }}" > output-${{ matrix.jdk_version }}-${{ matrix.base_os }}.md
+        echo "" >> output-${{ matrix.jdk_version }}-${{ matrix.base_os }}.md
+        docker run -t -e JDK_VERSION=${{ matrix.jdk_version }} --rm msopenjdk-freetype:${{ matrix.base_os }}-${{ matrix.jdk_version }} >> output-${{ matrix.jdk_version }}-${{ matrix.base_os }}.md
+        echo "" >> output-${{ matrix.jdk_version }}-${{ matrix.base_os }}.md
+        cat output-${{ matrix.jdk_version }}-${{ matrix.base_os }}.md
 
     - name: Upload Output
       uses: actions/upload-artifact@v4
       with:
         name: output-${{ matrix.jdk_version }}-${{ matrix.base_os }}
-        path: output-${{ matrix.jdk_version }}-${{ matrix.base_os }}.txt
+        path: output-${{ matrix.jdk_version }}-${{ matrix.base_os }}.md
 
   combine-reports:
     needs: build
     runs-on: ubuntu-latest
     if: always()
     steps:
-    - uses: actions/checkout@v4
-    - name: Download all artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: outputs
+      - uses: actions/checkout@v4
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: outputs
 
-    - name: Combine Outputs into a Single Report
-      run: |
-        find outputs -name '*.txt' -exec sh -c 'cat {} >> combined-report.txt && echo "" >> combined-report.txt' \;
-        cat combined-report.txt
+      - name: Combine Outputs into a Single Report
+        run: |
+          find outputs -name '*.md' -exec sh -c 'cat {} >> combined-report.md && echo "" >> combined-report.md' \;
+          cat combined-report.md
 
-    - name: Upload Combined Report to Workflow Summary
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const fs = require('fs');
-          const report = fs.readFileSync('combined-report.txt', 'utf8');
-          console.log(report);
-          github.rest.actions.createWorkflowRunSummary({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            run_id: context.runId,
-            text: report,
-            headers: {
-              'Content-Type': 'text/markdown',
-            },
-          });
+      - name: Upload Combined Report as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: combined-report
+          path: combined-report.md
