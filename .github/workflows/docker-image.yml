@@ -42,7 +42,7 @@ jobs:
     - name: Upload Output
       uses: actions/upload-artifact@v4
       with:
-        name: output-${{ matrix.jdk_version }}-${{ matrix.base_os }}
+        name: output-${{ matrix.jdk_version }}-${{ matrix.base_os }}.md
         path: output-${{ matrix.jdk_version }}-${{ matrix.base_os }}.md
 
   combine-reports:
@@ -64,5 +64,5 @@ jobs:
       - name: Upload Combined Report as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: combined-report
+          name: combined-report.md
           path: combined-report.md
